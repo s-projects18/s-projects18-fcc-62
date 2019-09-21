@@ -21,25 +21,36 @@ MongoClient.connect(CONNECTION_STRING, function(err, db) {
 module.exports = function (app) {
 
   app.route('/api/issues/:project')
-  
+    // I can GET /api/issues/{projectname} for an array of all issues on that specific project
+    // I can filter my get request by also passing along any field and value in the query
     .get(function (req, res){
       const projectname = req.params.project;
-      const project = database.getSingleProject(projectname, (err, doc)=>{
-        if(err!==null) {
+      // TODO: maybe some checks; allowed field ?
+      const filter = req.query;
+      const project = database.getProject(projectname, (err, doc)=>{
+        if(err==null) {
+          doc.error=false;
+          res.json(doc);
+        } else {
           console.log(err);
           res.json({error:true, msg:err});
-        } else {
-          doc.error=false;
-          
-          console.log(doc)
-          res.json(doc);
         }
-      });
+      }, filter);
     })
     
+    // I can POST /api/issues/{projectname} with form data containing
+    // required issue_title, issue_text, created_by, and optional assigned_to and status_text
     .post(function (req, res){
-      var project = req.params.project;
-      
+      req.body.projectname=req.params.project;
+      req.body.open=true;
+    
+      database.insertIssue(req.body, (err, doc) => {
+        if(err==null) res.json(doc);
+        else {
+          err.error=true;
+          res.json(err);
+        }
+      });
     })
     
     .put(function (req, res){

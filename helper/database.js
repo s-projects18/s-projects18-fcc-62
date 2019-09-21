@@ -33,8 +33,8 @@ exports.checkConnection = () => {
 
 // schema --------------------------------
 const issuesSchema = new Schema({
-  projectname: {type: String, unique:true}, //* -> not-relational
-	issue_title: {type: String}, //* -> unique in combination with projectname ???
+  projectname: {type: String}, //* -> not-relational
+	issue_title: {type: String}, //* , unique:true -> unique in combination with projectname ???
   issue_text: {type: String}, //*
 	created_on: {type: Date, default: Date.now},//auto
   updated_on: {type: Date, default: Date.now},//auto
@@ -49,16 +49,28 @@ const Issues = mongoose.model('issue', issuesSchema ); // Mongoose:issue <=> Mon
 
 
 // read --------------------------------
-// get project by projectname
-// next(projectname|false)
-exports.getSingleProject = (projectname, next) => {
+// next(err, docs)
+exports.getProject = (projectname, next, filter={}) => {
+  let condition = Object.assign({projectname: projectname}, filter);
   // doc is a Mongoose-object that CAN'T be modified
   // lean()+exec() will return a plain JS-object instead
-  Issues.findOne({projectname: projectname}).lean().exec((err, docs) => { 
+  Issues.find(condition).lean().exec((err, docs) => { 
     if(docs==null) { // entry doesn't exist
       next('no entry found', null);      
     } else {
       next(null, docs);
     }
   });
+}
+
+exports.insertIssue = (dataObj, next) => {
+  // create object based on model
+    let urlObj = new Issues(dataObj); 
+    const pr = urlObj.save();
+    pr.then(function (doc) {
+      next(null, doc); // new doc created
+    }).catch(function(err){
+      console.log("error", err);
+      next(err, null);
+    }); 
 }
