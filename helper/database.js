@@ -48,7 +48,7 @@ const issuesSchema = new Schema({
 const Issues = mongoose.model('issue', issuesSchema ); // Mongoose:issue <=> MongoDB:issues
 
 
-// read --------------------------------
+// read all issues --------------------------------
 // next(err, docs)
 exports.getProject = (projectname, next, filter={}) => {
   let condition = Object.assign({projectname: projectname}, filter);
@@ -63,14 +63,31 @@ exports.getProject = (projectname, next, filter={}) => {
   });
 }
 
-exports.insertIssue = (dataObj, next) => {
+exports.insertIssue = (insertDataObj, next) => {
   // create object based on model
-    let urlObj = new Issues(dataObj); 
-    const pr = urlObj.save();
-    pr.then(function (doc) {
-      next(null, doc); // new doc created
-    }).catch(function(err){
-      console.log("error", err);
-      next(err, null);
-    }); 
+  let urlObj = new Issues(insertDataObj); 
+  const pr = urlObj.save();
+  pr.then(function (doc) {
+    next(null, doc); // new doc created
+  }).catch(function(err){
+    console.log("error", err);
+    next(err, null);
+  }); 
+}
+
+// TODO: updateDate !!!!
+exports.updateIssue = (id, updateDataObj, next) => {
+  Issues.findOneAndUpdate({_id: id}, updateDataObj, {new:true}, next);    
+}
+
+exports.deleteIssue = (id, next) => {
+  Issues.deleteOne({_id: id}, (err, resultObject) => {
+    if(err==null) {
+      next(null, {deletedCount: resultObject.n}); 
+    } else {
+      console.log(err); // eg: wrong format for id -> casting error
+      next(err, null);     
+    }
+  });
+ 
 }
