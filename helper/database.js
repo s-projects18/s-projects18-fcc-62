@@ -37,12 +37,19 @@ const issuesSchema = new Schema({
 	issue_title: {type: String}, //* , unique:true -> unique in combination with projectname ???
   issue_text: {type: String}, //*
 	created_on: {type: Date, default: Date.now},//auto
-  updated_on: {type: Date, default: Date.now},//auto
+  updated_on: {type: Date, default: Date.now},//auto, update on change
   created_by: {type: String},//*
-  assigned_to: {type: String},//mand
+  assigned_to: {type: String},//opt
   open: {type: Boolean},//???
-  status_text: {type: String}//mand
+  status_text: {type: String}//opt
 });
+
+/*
+  TODO: maybe a project-schema can be added
+  - problem1: project can only be added together with an issue
+  - problem2: a list of existing projects can only be derived by querying ALL issues
+  
+*/
 
 // model --------------------------------
 const Issues = mongoose.model('issue', issuesSchema ); // Mongoose:issue <=> MongoDB:issues
@@ -75,8 +82,8 @@ exports.insertIssue = (insertDataObj, next) => {
   }); 
 }
 
-// TODO: updateDate !!!!
 exports.updateIssue = (id, updateDataObj, next) => {
+  updateDataObj.updated_on = new Date();
   Issues.findOneAndUpdate({_id: id}, updateDataObj, {new:true}, next);    
 }
 
