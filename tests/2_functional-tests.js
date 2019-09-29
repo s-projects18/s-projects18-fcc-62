@@ -94,7 +94,6 @@ suite('Functional Tests', function() {
             assert.equal(res.status, 500); 
             assert.equal(res.text, 'Missing required fields: issue_title, issue_text, created_by'); 
             done();
-          
           });         
       });      
     });
@@ -108,7 +107,8 @@ suite('Functional Tests', function() {
           .put('/api/issues/test')
           .send()
           .end(function(err, res){
-            console.log(res.text); // No document was updated. Maybe "_id" doesn't exist.
+            //console.log(res.text); 
+            // No document was updated. Maybe "_id" doesn't exist.
             assert.equal(res.status, 500); 
             done();
           });         
@@ -254,4 +254,16 @@ suite('Functional Tests', function() {
       
     });
 
+    // extra-suite 5
+    suite('GET / => check XSS', function() {
+      test('XSS header', function(done) {
+        chai.request(server)
+        .get('/api')
+          .end(function(err, res){ 
+          assert.equal(res.header['x-xss-protection'].substr(0,1), '1');
+         done();
+        });         
+      });
+    });
+  
 });
