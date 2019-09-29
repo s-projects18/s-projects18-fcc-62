@@ -36,6 +36,11 @@ app.use((req, res, next)=>{
 });
 
 // ----------------- get/post functions -----------------------
+app.route('/userstories')
+  .get(function (req, res) {
+    res.sendFile(process.cwd() + '/views/userstories.html');
+  });
+
 // Sample front-end
 app.route('/:project/')
   .get(function (req, res) {
